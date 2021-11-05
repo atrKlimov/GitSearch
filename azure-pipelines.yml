@@ -1,0 +1,39 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pr: none
+
+pool:
+  vmImage: 'macos-11'
+
+steps:
+  - checkout: self
+    submodules: true
+
+  - task: CocoaPods@0
+    displayName: 'Install dependencies'
+
+  - task: Xcode@5
+    inputs:
+      actions: 'build'
+      xcodeVersion: specifyPath
+      xcodeDeveloperDir: /Applications/Xcode_13.0_beta.app
+      configuration: 'Release'
+      sdk: 'iphoneos'
+      xcWorkspacePath: 'Evexia.xcworkspace'
+      scheme: 'Evexia Production'
+      signingOption: 'manual'
+      packageApp: true
+      exportArgs: '--dsym=true'
+      useXcpretty: true
+      
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: '$(build.artifactStagingDirectory)'
+      artifactName: 'ipa-files'
+      artifactType: 'container'
